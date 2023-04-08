@@ -1,43 +1,44 @@
-module Synthesizer
-  class Simple
-    def initialize
-      @waveform = :sine
-      @frequency = 440.0
-      @amplitude = 0.5
-      @phase = 0.0
-    end
+require_relative 'musical.rb' 
+require 'audio'
 
-    def play_note(note)
-      waveform = generate_waveform(note)
-      Audio.play(waveform)
-    end
+class Simple
+  include Musical 
 
-    def generate_waveform(note)
-      frequency = calculate_frequency(note)
-      phase_increment = frequency / Audio.sample_rate
-      waveform = []
-      (0..Audio.buffer_size).each do |i|
-        phase = @phase + i * phase_increment
-        sample = generate_sample(phase)
-        waveform << sample
-      end
-      waveform
-    end
+  def initialize(waveform=:sine)
+    @waveform = waveform
+  end
 
-    def calculate_frequency(note)
-      # Calculate frequency from note value (A4 = 440 Hz)
-      440.0 * 2**((note - 69) / 12.0)
-    end
+  def play_note_letter(note, duration)
+    frequency = letter_to_frequency(note)
+    play_note_frequency(frequency, duration)
+  end
 
-    def generate_sample(phase)
-      case @waveform
+  def play_note_frequency(note, duration)
+    waveform = generate_waveform(note)
+    Audio.play(waveform)
+  end
+
+  def generate_waveform(freq, duration)
+    waveform = @waveform
+    samples = duration * Audio::SAMPLE_RATE
+    phase_increment = freq / Audio::SAMPLE_RATE
+    phase = 0.0
+    waveform_samples = []
+    
+    samples.to_i.times do |i|
+      case waveform
       when :sine
-        Math.sin(2 * Math::PI * phase)
-      when :square
-        phase < 0.5 ? 1.0 : -1.0
+        waveform_samples << Math.sin(2 * Math::PI * phase)
       when :sawtooth
-        2 * (phase - phase.floor) - 1
+        waveform_samples << ((phase * 2) - 1)
+      when :square
+        waveform_samples << (phase < 0.5 ? -1 : 1)
       end
+      
+      phase += phase_increment
+      phase -= 1 if phase >= 1
     end
+    
+    waveform_samples
   end
 end

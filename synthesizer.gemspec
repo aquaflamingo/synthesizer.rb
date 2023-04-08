@@ -34,8 +34,5 @@ Gem::Specification.new do |spec|
   # Uncomment to register a new dependency of your gem
   spec.add_development_dependency "pry"
 
-  spec.add_dependency 'gtk3' 
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  # spec.add_dependency 'gtk3' 
 end
